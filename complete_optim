@@ -1,5 +1,84 @@
 
 
+
+#install.packages("git2r", "dplyr")
+
+library(dplyr)
+library(migraR)
+
+#devtools::install_git("https://github.com/jackowacko/migraR")
+
+####################################################################3
+
+### ejemplo del paquete
+dataIn <- read.table("https://raw.githubusercontent.com/elflacosebas/thesis/master/mexico.txt",header = T)
+colnames(dataIn) <-c("x","y")
+data1 <- dataIn
+attach(data1)
+
+
+data("es_asmr")
+data1 <- es_asmr[-c(1,2,3,4,5),c(1,2)]
+colnames(data1) <- c("x","y")
+attach(data1)
+plot(data1)
+
+model.rc.7 = MigraModel(
+  name = 'castro_7',
+  expr = rc_expression(profile = "seven")
+)
+model.rc.11 = MigraModel(
+  name = 'castro_11',
+  expr = rc_expression(profile = "eleven")
+)
+
+model.rc.13 = MigraModel(
+  name = 'castro_13',  #HABÍA UN ERROR AQUÍ
+  expr = rc_expression(profile = "thirteen")
+)
+
+ini <- Sys.time()
+fitted.val.7 <- best_migramod(dataIn = data1, model.rc = model.rc.7, iter = 100, profile = "seven")
+fitted.val.11 <- best_migramod(dataIn = data1, model.rc = model.rc.11, iter = 100, profile = "eleven")
+fitted.val.13 <- best_migramod(dataIn = data1, model.rc = model.rc.13, iter = 100, profile = "thirteen")
+fin <- Sys.time()
+fin-ini
+
+x11()
+plot(data1, cex = 0.5, xlab = 'Age', ylab = 'Standarized Migration Rate')
+lines(data1[,1], model.rc.7$value(fitted.val.7$bestParam,data1), col="red", lty = 2)
+lines(data1[,1], model.rc.11$value(fitted.val.11$bestParam,data1), col="blue", lty = 3)
+lines(data1[,1], model.rc.13$value(fitted.val.13$bestParam,data1), col="darkgreen", lty = 5)
+legend('topright',
+       legend = c(paste("7 Par.", "MAPE:", round(as.numeric(fitted.val.7$bestMAPE),3)), 
+                  paste("11 Par.", "MAPE:", round(as.numeric(fitted.val.11$bestMAPE),3)), 
+                  paste("13 Par.", "MAPE:", round(as.numeric(fitted.val.13$bestMAPE),3))),
+       col = c("red","blue","darkgreen"), 
+       lty = c(2,3,5))
+
+
+######### nueva función de estimación partiendo de fit migramod
+
+tol <- 0
+con <- 0
+mat <- 0 
+#while(tol > 0.000001)
+ini <- Sys.time()
+for(i in 1:1000){
+
+fitted.val.13 <- best_migramod(dataIn = data1, model.rc = model.rc.13, iter = 30, profile = "thirteen")
+tol <- unlist(fitted.val.13$bestParam)
+mat <- rbind(mat,tol)
+
+}
+con
+mat <- mat[-1,]
+tol
+fin <- Sys.time()
+fin-ini
+
+
+###################################################################################################################
 #install.packages("git2r", "dplyr")
 
 library(dplyr)
