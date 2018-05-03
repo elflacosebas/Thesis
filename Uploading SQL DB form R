@@ -1,0 +1,51 @@
+setwd("")
+
+library(data.table)
+library(RPostgreSQL)
+library(dplyr)
+library(ggplot2)
+
+  
+m <- dbDriver("PostgreSQL")
+con <- dbConnect(m, user="postgres", password="xxx", dbname="xxx", host='localhost', port=5432)
+#mig_db <- src_postgres(dbname = 'xxx', user = 'postgres', password = 'xxx')
+
+
+############ primera base
+######################################################
+### las siguientes líneas crean una tabla vacía asignando el tipo de dato y el nombre de la columna, con lo cual, 
+### es necesario 
+createTable_ddl <- paste("CREATE TABLE IF NOT EXISTS primera (country integer,
+                         year integer,
+                         sample integer,
+                         serial bigint,
+                         pernum integer,
+                         perwt double precision,
+                         resident integer,
+                         age integer,
+                         age2 integer,
+                         sex integer,
+                         birthyr integer,
+                         nativity integer,
+                         bplcountry integer,
+                         citizen integer,
+                         nation integer, 
+                         yrimm integer,
+                         yrsimm integer,
+                         yrsimm2 integer,
+                         migrate1 integer, 
+                         migrate5 integer, 
+                         migratep integer, 
+                         migctry1 integer, 
+                         migctry5 integer, 
+                         migctryp integer   
+                         );")
+
+dbExecute(con,createTable_ddl) 
+
+### ésta línea ejecuta el llenado de la tabla
+dbWriteTable(con,"primera","ipumsi_00040.csv", sep=",",header=T,append=T)
+
+hacer lo mismo con las demás tablas. 
+
+
